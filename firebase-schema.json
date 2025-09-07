@@ -1,0 +1,117 @@
+{
+  "collections": {
+    "config": {
+      "documents": {
+        "app": {
+          "fields": {
+            "currentSeason": "number",
+            "adMobBannerId": "string",
+            "adMobInterstitialId": "string", 
+            "adFrequencyCapMinutes": "number",
+            "appName": "string",
+            "appVersion": "string",
+            "maintenanceMode": "boolean",
+            "maintenanceMessage": "string (optional)",
+            "updatedAt": "timestamp"
+          }
+        }
+      }
+    },
+    "polls": {
+      "fields": {
+        "title": "string",
+        "embedUrl": "string",
+        "pollId": "string (NEW - for script embed)",
+        "isActive": "boolean",
+        "week": "number",
+        "season": "number", 
+        "createdAt": "timestamp",
+        "updatedAt": "timestamp"
+      },
+      "removed_fields": [
+        "hashtag (moved to twitterFeeds collection)"
+      ]
+    },
+    "tabConfigs": {
+      "fields": {
+        "key": "string (vote|promos|updates|contestants)",
+        "label": "string",
+        "isEnabled": "boolean",
+        "order": "number",
+        "season": "number",
+        "createdAt": "timestamp"
+      },
+      "description": "NEW collection for dynamic tab management"
+    },
+    "promoVideos": {
+      "fields": {
+        "title": "string",
+        "youtubeId": "string",
+        "thumbnailUrl": "string (auto-generated)",
+        "description": "string (optional)",
+        "duration": "string (optional)",
+        "publishedAt": "timestamp",
+        "isActive": "boolean",
+        "season": "number",
+        "week": "number (optional)"
+      },
+      "description": "NEW collection for YouTube video management"
+    },
+    "twitterFeeds": {
+      "fields": {
+        "hashtag": "string",
+        "isActive": "boolean",
+        "season": "number",
+        "displayCount": "number",
+        "createdAt": "timestamp"
+      },
+      "description": "NEW collection for Twitter hashtag configuration"
+    },
+    "rssFeeds": {
+      "fields": {
+        "name": "string",
+        "url": "string",
+        "isActive": "boolean", 
+        "refreshInterval": "number (minutes)",
+        "lastFetched": "timestamp (optional)",
+        "createdAt": "timestamp"
+      },
+      "description": "NEW collection for RSS feed sources"
+    },
+    "contestants": {
+      "fields": {
+        "name": "string",
+        "imageUrl": "string",
+        "status": "string (active|eliminated)",
+        "season": "number",
+        "description": "string (optional)",
+        "age": "number (NEW)",
+        "profession": "string (NEW)", 
+        "hometown": "string (NEW)"
+      },
+      "description": "Enhanced with additional profile fields"
+    },
+    "news": {
+      "fields": {
+        "title": "string",
+        "content": "string",
+        "timestamp": "timestamp",
+        "type": "string (elimination|general|voting|announcement)",
+        "imageUrl": "string (optional)",
+        "source": "string (NEW - RSS source name)",
+        "url": "string (NEW - external link)"
+      },
+      "description": "Enhanced with source tracking"
+    }
+  },
+  "indexes": {
+    "required": [
+      "polls: isActive (single field)",
+      "tabConfigs: season + isEnabled + order (composite)",
+      "promoVideos: season + isActive + publishedAt (composite)",
+      "twitterFeeds: season + isActive (composite)",
+      "contestants: season + status (composite)",
+      "news: timestamp (single field, descending)"
+    ]
+  }
+}

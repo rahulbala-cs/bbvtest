@@ -1,0 +1,93 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "tabConfigs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "season",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "isEnabled",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "order",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "tabConfigs", 
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "season",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "order",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "promoVideos",
+      "queryScope": "COLLECTION", 
+      "fields": [
+        {
+          "fieldPath": "season",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "isActive",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "publishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "twitterFeeds",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "season", 
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "isActive",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "contestants",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "season",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "news",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "timestamp",
+          "order": "DESCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

@@ -1,0 +1,110 @@
+apply plugin: "com.android.application"
+apply plugin: "com.facebook.react"
+apply plugin: 'com.google.gms.google-services'
+
+android {
+    namespace "com.biggboss.teluguvote"
+    compileSdkVersion rootProject.ext.compileSdkVersion
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    defaultConfig {
+        applicationId "com.biggboss.teluguvote"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+        multiDexEnabled true
+    }
+
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+
+    dependenciesInfo {
+        includeInApk false
+        includeInBundle false
+    }
+
+    splits {
+        abi {
+            reset()
+            enable false
+            universalApk false
+        }
+    }
+
+    signingConfigs {
+        debug {
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
+        release {
+            signingConfig signingConfigs.debug
+            minifyEnabled false
+            shrinkResources false
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    
+    //noinspection GradleDynamicVersion
+    implementation "com.facebook.react:react-native:+"
+    
+    // MultiDex support
+    implementation 'com.android.support:multidex:1.0.3'
+    
+    // Firebase
+    implementation platform('com.google.firebase:firebase-bom:32.3.1')
+    implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.firebase:firebase-messaging'
+    implementation 'com.google.firebase:firebase-firestore'
+    
+    // AdMob
+    implementation 'com.google.android.gms:play-services-ads:22.4.0'
+    
+    
+    debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
+        exclude group:'com.facebook.fbjni'
+    }
+    debugImplementation("com.facebook.flipper:flipper-network-plugin:${FLIPPER_VERSION}") {
+        exclude group:'com.facebook.fbjni'
+    }
+    debugImplementation("com.facebook.flipper:flipper-fresco-plugin:${FLIPPER_VERSION}") {
+        exclude group:'com.facebook.fbjni'
+    }
+
+    if (enableHermes) {
+        //noinspection GradleDynamicVersion
+        implementation("com.facebook.react:hermes-engine:+")
+    } else {
+        implementation jscFlavor
+    }
+}
+
+// Vector Icons task
+apply from: file("../../node_modules/react-native-vector-icons/fonts.gradle")
+
+apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
+
+// Skip AAR metadata check
+tasks.whenTaskAdded { task ->
+    if (task.name.contains("checkDebugAarMetadata")) {
+        task.enabled = false
+    }
+}

@@ -1,0 +1,39 @@
+{
+  "name": "BiggBossTeluguVote",
+  "displayName": "BB Telugu Vote",
+  "description": "Official voting app for Bigg Boss Telugu - Vote for your favorite contestants",
+  "react-native-google-mobile-ads": {
+    "android_app_id": "ca-app-pub-3940256099942544~3347511713"
+  },
+  "expo": {
+    "name": "BB Telugu Vote",
+    "slug": "bigg-boss-telugu-vote",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FF0050"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.biggboss.teluguvote"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FF0050"
+      },
+      "package": "com.biggboss.teluguvote",
+      "versionCode": 1
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
