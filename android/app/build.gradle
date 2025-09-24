@@ -1,6 +1,8 @@
 apply plugin: "com.android.application"
 apply plugin: "com.facebook.react"
 apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.firebase.crashlytics'
+apply plugin: 'com.google.firebase.firebase-perf'
 
 android {
     namespace "com.biggboss.teluguvote"
@@ -15,8 +17,8 @@ android {
         applicationId "com.biggboss.teluguvote"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode 4
+        versionName "1.0.3"
         multiDexEnabled true
     }
 
@@ -45,6 +47,25 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        release {
+            if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
+                def ksPath = MYAPP_UPLOAD_STORE_FILE
+                def ksFile = file(ksPath)
+                if (!ksFile.exists()) {
+                    ksFile = file("../" + ksPath)
+                }
+                storeFile ksFile
+                storePassword MYAPP_UPLOAD_STORE_PASSWORD
+                keyAlias MYAPP_UPLOAD_KEY_ALIAS
+                keyPassword MYAPP_UPLOAD_KEY_PASSWORD
+            }
+        }
+    }
+
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/DEPENDENCIES', 'META-INF/LICENSE*', 'META-INF/NOTICE*', 'META-INF/*.kotlin_module']
+        }
     }
 
     buildTypes {
@@ -52,12 +73,17 @@ android {
             signingConfig signingConfigs.debug
         }
         release {
-            signingConfig signingConfigs.debug
-            minifyEnabled false
+            signingConfig signingConfigs.release
+            minifyEnabled true
             shrinkResources false
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
         }
     }
+
+    // Manifest placeholders for AdMob
+    defaultConfig.manifestPlaceholders = [
+        ADMOB_APP_ID: project.hasProperty('ADMOB_APP_ID') ? ADMOB_APP_ID : 'ca-app-pub-3940256099942544~3347511713'
+    ]
 }
 
 dependencies {
@@ -66,14 +92,16 @@ dependencies {
     //noinspection GradleDynamicVersion
     implementation "com.facebook.react:react-native:+"
     
-    // MultiDex support
-    implementation 'com.android.support:multidex:1.0.3'
+    // MultiDex support (AndroidX)
+    implementation 'androidx.multidex:multidex:2.0.1'
     
     // Firebase
     implementation platform('com.google.firebase:firebase-bom:32.3.1')
     implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.google.firebase:firebase-messaging'
     implementation 'com.google.firebase:firebase-firestore'
+    implementation 'com.google.firebase:firebase-crashlytics'
+    implementation 'com.google.firebase:firebase-perf'
     
     // AdMob
     implementation 'com.google.android.gms:play-services-ads:22.4.0'

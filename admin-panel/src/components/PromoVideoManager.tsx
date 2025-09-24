@@ -108,20 +108,31 @@ const PromoVideoManager: React.FC = () => {
       // Extract YouTube ID from URL if full URL is provided
       const youtubeId = extractYouTubeId(data.youtubeId)
 
-      const videoData = {
-        ...data,
+      // Coerce types to satisfy Firestore rules (numbers/booleans) and ensure required fields
+      const seasonNumber = Number(data.season)
+      const weekNumber = data.week ? Number(data.week) : undefined
+      const isActive = !!data.isActive
+
+      const videoData: any = {
+        title: data.title?.trim() ?? '',
         youtubeId,
-        thumbnailUrl: `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`,
+        description: data.description?.trim() ?? '',
+        duration: data.duration?.trim() ?? '',
+        season: isNaN(seasonNumber) ? 0 : seasonNumber,
+        isActive,
+        thumbnailUrl: `https://img.youtube.com/vi/${youtubeId}/mqdefault.jpg`,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
         publishedAt: serverTimestamp(),
+      }
+      if (weekNumber) {
+        videoData.week = weekNumber
       }
 
       if (editingVideo) {
         // Update existing video
         const videoRef = doc(db, 'promoVideos', editingVideo.id)
-        await updateDoc(videoRef, {
-          ...videoData,
-          updatedAt: serverTimestamp(),
-        })
+        await updateDoc(videoRef, { ...videoData, updatedAt: serverTimestamp() })
         showMessage('Promo video updated successfully!', 'success')
         setEditingVideo(null)
       } else {

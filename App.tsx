@@ -11,15 +11,20 @@ import DrawerNavigator from './src/navigation/DrawerNavigator';
 import { navigationRef } from './src/navigation/navigationRef';
 // import { AdService } from './src/services/ads';
 import { NotificationService } from './src/services/notifications';
+import { ConsentService } from './src/services/consent'
 import { ReviewService } from './src/services/review';
 import { COLORS } from './src/config/constants';
+// Avoid using Crashlytics API directly while provider is disabled
 
 export default function App() {
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        // Initialize Google Mobile Ads
-        await mobileAds().initialize();
+        // Consent then initialize Google Mobile Ads
+        await ConsentService.requestConsent()
+        await mobileAds().initialize()
+        // Preload interstitials early
+        try { (await import('./src/services/ads')).AdService.initialize() } catch (_) {}
         
         // Initialize ad service - temporarily disabled
         // AdService.initialize();
@@ -30,6 +35,9 @@ export default function App() {
         // Get push token and store it
         const pushToken = await NotificationService.getFCMToken();
         console.log('Push token:', pushToken);
+
+        // Crashlytics/Perf temporarily disabled to avoid runtime crash during UAT
+        // Enable back once Crashlytics plugin upgrade is validated
 
         // Set up notification listeners
         NotificationService.addNotificationListener((notification) => {

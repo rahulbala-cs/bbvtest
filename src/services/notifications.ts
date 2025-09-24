@@ -6,22 +6,28 @@ import { StorageService } from '../utils/storage';
 export const NotificationService = {
   async requestPermissions(): Promise<boolean> {
     try {
-      // On Android 13+, POST_NOTIFICATIONS runtime permission is required
+      // Android < 13: no runtime permission required
       if (Platform.OS === 'android') {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-        );
-        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-          return false;
+        const apiLevel = Number(Platform.Version) || 0
+        if (apiLevel >= 33) {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+          )
+          if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+            return false
+          }
         }
+        // On Android, FCM does not require requestPermission; treat as enabled
+        return true
       }
 
-      const authStatus = await messaging().requestPermission();
+      // iOS: request permission
+      const authStatus = await messaging().requestPermission()
       const enabled =
         authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+        authStatus === messaging.AuthorizationStatus.PROVISIONAL
 
-      return enabled;
+      return enabled
     } catch (error) {
       console.error('Error requesting notification permissions:', error);
       return false;
@@ -71,6 +77,7 @@ export const NotificationService = {
         } catch (err) {
           console.error('Error updating device token:', err);
         }
+        try { await messaging().subscribeToTopic('all-users'); } catch (_) {}
       });
 
       return token;

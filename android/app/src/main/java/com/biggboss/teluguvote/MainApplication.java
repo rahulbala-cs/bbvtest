@@ -9,6 +9,8 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
 import com.facebook.react.defaults.DefaultReactNativeHost;
 import com.facebook.soloader.SoLoader;
 import java.util.List;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -52,6 +54,45 @@ public class MainApplication extends Application implements ReactApplication {
   @Override
   public void onCreate() {
     super.onCreate();
+    // Ensure default Firebase app exists before JS modules attempt access
+    try {
+      FirebaseApp.initializeApp(this);
+      if (FirebaseApp.getApps(this).isEmpty()) {
+        // Fallback: build options manually from resources or hardcoded safe defaults
+        String appId;
+        String apiKey;
+        String projectId;
+        String gcmSenderId;
+        String storageBucket;
+        try {
+          int idApp = getResources().getIdentifier("google_app_id", "string", getPackageName());
+          int idKey = getResources().getIdentifier("google_api_key", "string", getPackageName());
+          int idProj = getResources().getIdentifier("project_id", "string", getPackageName());
+          int idGcm = getResources().getIdentifier("gcm_defaultSenderId", "string", getPackageName());
+          int idBucket = getResources().getIdentifier("google_storage_bucket", "string", getPackageName());
+          appId = idApp != 0 ? getString(idApp) : "1:721871577189:android:4c4884207e2d4dfbd6a68c";
+          apiKey = idKey != 0 ? getString(idKey) : "AIzaSyDJXZti_sPo7fKDr07uQaTQDQZHbFxJWHg";
+          projectId = idProj != 0 ? getString(idProj) : "bigg-boss-telugu-vote";
+          gcmSenderId = idGcm != 0 ? getString(idGcm) : "721871577189";
+          storageBucket = idBucket != 0 ? getString(idBucket) : "bigg-boss-telugu-vote.firebasestorage.app";
+        } catch (Exception e) {
+          appId = "1:721871577189:android:4c4884207e2d4dfbd6a68c";
+          apiKey = "AIzaSyDJXZti_sPo7fKDr07uQaTQDQZHbFxJWHg";
+          projectId = "bigg-boss-telugu-vote";
+          gcmSenderId = "721871577189";
+          storageBucket = "bigg-boss-telugu-vote.firebasestorage.app";
+        }
+
+        FirebaseOptions options = new FirebaseOptions.Builder()
+          .setApplicationId(appId)
+          .setApiKey(apiKey)
+          .setProjectId(projectId)
+          .setGcmSenderId(gcmSenderId)
+          .setStorageBucket(storageBucket)
+          .build();
+        FirebaseApp.initializeApp(this, options);
+      }
+    } catch (Exception ignored) {}
     SoLoader.init(this, /* native exopackage */ false);
     // Reanimated: ensure class is available at startup (no-op guard)
     try {
