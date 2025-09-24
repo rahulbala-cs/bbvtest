@@ -1,7 +1,18 @@
-import firestore from '@react-native-firebase/firestore';
+import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { Contestant, Poll, NewsItem, PromoVideo, TwitterFeed, RSSFeed, TabConfig, AppConfig } from '../types';
 
 const db = firestore();
+
+const toDateSafe = (v: any): Date | undefined => {
+  if (!v) return undefined
+  const ts = v as FirebaseFirestoreTypes.Timestamp
+  if (ts && typeof ts.toDate === 'function') {
+    try { return ts.toDate() } catch { return undefined }
+  }
+  if (typeof v === 'number') return new Date(v)
+  if (typeof v === 'string') { const d = new Date(v); return isNaN(+d) ? undefined : d }
+  return undefined
+}
 
 export const FirestoreService = {
   // Polls
@@ -24,8 +35,8 @@ export const FirestoreService = {
         isActive: data.isActive,
         week: data.week,
         season: data.season,
-        createdAt: data.createdAt.toDate(),
-        updatedAt: data.updatedAt.toDate(),
+        createdAt: toDateSafe(data.createdAt),
+        updatedAt: toDateSafe(data.updatedAt),
       };
     } catch (error) {
       console.error('Error fetching active poll:', error);
@@ -54,8 +65,8 @@ export const FirestoreService = {
           isActive: data.isActive,
           week: data.week,
           season: data.season,
-          createdAt: data.createdAt.toDate(),
-          updatedAt: data.updatedAt.toDate(),
+          createdAt: toDateSafe(data.createdAt),
+          updatedAt: toDateSafe(data.updatedAt),
         };
         
         callback(poll);
@@ -126,7 +137,7 @@ export const FirestoreService = {
         id: doc.id,
         title: doc.data().title,
         content: doc.data().content,
-        timestamp: doc.data().timestamp.toDate(),
+        timestamp: toDateSafe(doc.data().timestamp),
         type: doc.data().type,
         imageUrl: doc.data().imageUrl,
       }));
@@ -150,7 +161,7 @@ export const FirestoreService = {
           id: doc.id,
           title: doc.data().title,
           content: doc.data().content,
-          timestamp: doc.data().timestamp.toDate(),
+          timestamp: toDateSafe(doc.data().timestamp),
           type: doc.data().type,
           imageUrl: doc.data().imageUrl,
           source: doc.data().source,
@@ -254,7 +265,7 @@ export const FirestoreService = {
         thumbnailUrl: doc.data().thumbnailUrl,
         description: doc.data().description,
         duration: doc.data().duration,
-        publishedAt: doc.data().publishedAt.toDate(),
+        publishedAt: toDateSafe(doc.data().publishedAt),
         isActive: doc.data().isActive,
         season: doc.data().season,
         week: doc.data().week,
@@ -283,7 +294,7 @@ export const FirestoreService = {
           thumbnailUrl: doc.data().thumbnailUrl,
           description: doc.data().description,
           duration: doc.data().duration,
-          publishedAt: doc.data().publishedAt.toDate(),
+          publishedAt: toDateSafe(doc.data().publishedAt),
           isActive: doc.data().isActive,
           season: doc.data().season,
           week: doc.data().week,
@@ -334,7 +345,7 @@ export const FirestoreService = {
         url: doc.data().url,
         isActive: doc.data().isActive,
         refreshInterval: doc.data().refreshInterval,
-        lastFetched: doc.data().lastFetched?.toDate(),
+        lastFetched: toDateSafe(doc.data().lastFetched),
       }));
     } catch (error) {
       console.error('Error fetching RSS feeds:', error);

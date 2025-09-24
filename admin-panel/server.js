@@ -24,6 +24,9 @@ app.use(cors({
 }));
 
 app.use(express.json());
+// Explicit preflight handling for all routes
+// Express 5 path-to-regexp is strict; use regex to match all for preflight
+app.options(/.*/, cors());
 
 // Initialize Firebase Admin (supports ADC, file path, or base64 env)
 try {
@@ -60,8 +63,9 @@ app.post('/api/send-notification', async (req, res) => {
 
     const messaging = getMessaging();
     
+    const TARGET_TOPIC = process.env.TOPIC || 'general'
     const msg = {
-      topic: 'all-users',
+      topic: TARGET_TOPIC,
       notification: {
         title,
         body: message,
@@ -118,8 +122,21 @@ app.post('/api/send-notification-to-token', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3001;
+// Resolve port from ENV or CLI args (--port / -p)
+function resolvePort() {
+  const envPort = Number(process.env.PORT)
+  if (!isNaN(envPort) && envPort > 0) return envPort
+  const argv = process.argv
+  const portFlagIndex = Math.max(argv.indexOf('--port'), argv.indexOf('-p'))
+  if (portFlagIndex !== -1) {
+    const val = Number(argv[portFlagIndex + 1])
+    if (!isNaN(val) && val > 0) return val
+  }
+  return 3001
+}
+
+const PORT = resolvePort()
 app.listen(PORT, () => {
-  console.log(`Notification server running on port ${PORT}`);
-  console.log(`Send notifications to: http://localhost:${PORT}/api/send-notification`);
-});
+  console.log(`Notification server running on port ${PORT}`)
+  console.log(`Send notifications to: http://localhost:${PORT}/api/send-notification`)
+})

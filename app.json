@@ -1,12 +1,12 @@
 {
   "name": "BiggBossTeluguVote",
-  "displayName": "BB Telugu Vote",
-  "description": "Official voting app for Bigg Boss Telugu - Vote for your favorite contestants",
+  "displayName": "Bigg Boss Telugu Voting",
+  "description": "Bigg Boss Telugu voting, results, promos & updates.",
   "react-native-google-mobile-ads": {
     "android_app_id": "ca-app-pub-3940256099942544~3347511713"
   },
   "expo": {
-    "name": "BB Telugu Vote",
+    "name": "Bigg Boss Telugu Voting",
     "slug": "bigg-boss-telugu-vote",
     "version": "1.0.0",
     "orientation": "portrait",

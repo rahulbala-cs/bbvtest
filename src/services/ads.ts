@@ -5,12 +5,14 @@ import {
   InterstitialAd,
   AdEventType,
 } from 'react-native-google-mobile-ads';
+import { ADS } from '../config/constants'
 
 // Ad unit IDs - replace with your actual AdMob IDs
+const useTestIds = __DEV__ || ADS.FORCE_TEST_ADS
 const AD_UNIT_IDS = {
-  banner: __DEV__ ? TestIds.BANNER : 'ca-app-pub-0266697578250731/6968635270',
-  interstitial: __DEV__ ? TestIds.INTERSTITIAL : 'ca-app-pub-0266697578250731/7274653380',
-  inlineBanner: __DEV__ ? TestIds.BANNER : 'ca-app-pub-0266697578250731/9541739987',
+  banner: useTestIds ? TestIds.BANNER : 'ca-app-pub-0266697578250731/6968635270',
+  interstitial: useTestIds ? TestIds.INTERSTITIAL : 'ca-app-pub-0266697578250731/7274653380',
+  inlineBanner: useTestIds ? TestIds.BANNER : 'ca-app-pub-0266697578250731/9541739987',
 };
 
 // Interstitial ad instance (v13+ uses createForAdRequest)

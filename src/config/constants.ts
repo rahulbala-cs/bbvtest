@@ -141,3 +141,8 @@ export const ANIMATIONS = {
   slow: 500,
   slowest: 800,
 };
+
+// Ads config (UAT): force test ads everywhere to ensure fill on devices
+export const ADS = {
+  FORCE_TEST_ADS: false,
+};

@@ -20,6 +20,7 @@ interface NotificationFormData {
   title: string
   message: string
   type: 'voting' | 'elimination' | 'announcement' | 'general'
+  deviceToken?: string
 }
 
 const NotificationSender: React.FC = () => {
@@ -43,29 +44,47 @@ const NotificationSender: React.FC = () => {
     try {
       setSubmitting(true)
 
-      // Backend API to Cloud Function or local emulator
-      const API_URL = import.meta.env.VITE_NOTIFICATIONS_API || '/api/send-notification'
+      // Resolve backend API base (prefer explicit env, then default localhost:3001)
+      // Try env, then same-origin, then common local ports (3002, 3001)
+      const envBase = (import.meta as any).env?.VITE_NOTIF_API_BASE || (import.meta as any).env?.VITE_NOTIFICATIONS_API
+      const sameOrigin = `${window.location.origin}`
+      const candidates = [envBase, sameOrigin, 'http://localhost:3002', 'http://127.0.0.1:3002', 'http://localhost:3001', 'http://127.0.0.1:3001']
+      const API_BASE = candidates.find(Boolean) as string
+      const base = String(API_BASE).replace(/\/$/, '')
+      const isToken = !!data.deviceToken && data.deviceToken.trim().length > 0
+      const API_URL = isToken
+        ? `${base}/api/send-notification-to-token`
+        : `${base}/api/send-notification`
+
+      const payloadBody: any = {
+        title: data.title,
+        message: data.message,
+        type: data.type,
+      }
+      if (isToken) payloadBody.token = data.deviceToken!.trim()
+
       const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          title: data.title,
-          message: data.message,
-          type: data.type,
-        }),
+        body: JSON.stringify(payloadBody),
       })
 
-      if (response.ok) {
-        showMessage('Notification sent successfully to all users!', 'success')
-        reset()
-      } else {
-        throw new Error('Failed to send notification')
+      const payloadText = await response.text()
+      const payload = (() => { try { return JSON.parse(payloadText) } catch { return null } })()
+
+      if (!response.ok) {
+        const serverMsg = payload?.error || payload?.message || `HTTP ${response.status}`
+        throw new Error(serverMsg)
       }
+
+      showMessage(isToken ? 'Notification sent to device token!' : 'Notification sent to all users!', 'success')
+      reset()
     } catch (error) {
       console.error('Error sending notification:', error)
-      showMessage('Error sending notification. Please check API config and try again.', 'error')
+      const msg = (error as any)?.message || 'Error sending notification'
+      showMessage(`Failed: ${msg}`, 'error')
     } finally {
       setSubmitting(false)
     }
