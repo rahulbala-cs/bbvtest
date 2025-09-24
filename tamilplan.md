@@ -334,4 +334,125 @@ Release smoke
 - Per-edition theming (fonts, accent colors)
 - Additional editions (Kannada, Hindi) by adding new config files only
 
+---
+
+## Addenda: Implementation Clarifications
+
+### 1) Storage layer (AsyncStorage wrapper)
+- Confirm `src/utils/storage.ts` supports both string and JSON payloads.
+- Surface write/read failures in dev logs for easier debugging.
+- Suggested pattern (concept):
+
+```ts
+// src/context/EditionProvider.tsx (excerpt with logging)
+import { logger } from '../utils/logger'
+
+useEffect(() => {
+	getItem('edition')
+		.then(saved => {
+			if (saved === 'tamil' || saved === 'telugu') setEditionState(saved)
+		})
+		.catch(err => logger?.warn?.('edition read failed', err))
+}, [])
+
+const setEdition = (next: Edition) => {
+	setEditionState(next)
+	setItem('edition', next).catch(err => logger?.warn?.('edition write failed', err))
+}
+```
+
+### 2) Branding assets and pipeline
+- Use explicit static imports for React Native bundling (no dynamic paths).
+- Recommended structure:
+  - `assets/logos/telugu.png`
+  - `assets/logos/tamil.png`
+- Config example:
+
+```ts
+// src/config/editions/telugu.ts (concept)
+import teluguLogo from '../../../assets/logos/telugu.png'
+
+export default {
+	branding: {
+		appTitle: 'Bigg Boss Vote - Telugu',
+		primaryColor: '#E30613',
+		logo: teluguLogo,
+	},
+	// ... ads, firestore
+}
+
+// src/config/editions/tamil.ts (concept)
+import tamilLogo from '../../../assets/logos/tamil.png'
+
+export default {
+	branding: {
+		appTitle: 'Bigg Boss Vote - Tamil',
+		primaryColor: '#8B1A9A',
+		logo: tamilLogo,
+	},
+	// ... ads, firestore
+}
+```
+
+### 3) Migration strategy (collections → editions/*)
+- Goal: avoid serving stale or mixed data during rollout.
+- Options:
+  1. Maintenance window (simplest)
+     - Freeze admin writes for ~5–10 minutes
+     - Run migration script to copy `polls`, `contestants`, `news` to
+       `editions/telugu/*`
+     - Flip app build to read from `editions/*`
+  2. Live backfill + flag
+     - Deploy code reading from `editions/*` behind a feature flag
+     - Backfill data in background
+     - Once complete, enable flag
+- Script stub (Node/Firebase Admin) - store at `scripts/migrateToEditions.ts`:
+
+```ts
+// Pseudocode
+// for each collectionName of ['polls', 'contestants', 'news']:
+//   read from root collection
+//   write to `editions/telugu/${collectionName}` with same doc IDs
+```
+
+### 4) Firestore security rules update
+Add edition-aware rules that match the new structure:
+
+```txt
+rules_version = '2';
+service cloud.firestore {
+	match /databases/{database}/documents {
+		function isValidEdition(e) {
+			return e in ['telugu', 'tamil'];
+		}
+
+		match /editions/{edition}/{document=**} {
+			allow read: if true; // or restrict as needed
+			allow write: if request.auth != null && isValidEdition(edition);
+		}
+	}
+}
+```
+
+Admin panel must target `editions/{edition}/...` and follow the same rules.
+
+### 5) Telemetry for edition switch lifecycle
+- Emit a health event on switch start/success/failure.
+- Example (concept):
+
+```ts
+import analytics from '@react-native-firebase/analytics'
+
+async function switchEdition (prev: Edition, next: Edition) {
+	await analytics().logEvent('edition_switch_start', { prev, next })
+	try {
+		// unsubscribe listeners, update topics, persist, reload
+		await analytics().logEvent('edition_switch_success', { prev, next })
+	} catch (err) {
+		await analytics().logEvent('edition_switch_failure', { prev, next })
+		throw err
+	}
+}
+```
+
 
